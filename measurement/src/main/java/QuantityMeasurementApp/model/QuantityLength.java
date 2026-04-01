@@ -1,6 +1,9 @@
 package QuantityMeasurementApp.model;
 import QuantityMeasurementApp.enums.LengthUnit;
 public class QuantityLength{
+
+    private static final double EPSILON = 0.0001;
+
     private final double value;
     private final LengthUnit unit;
 
@@ -21,6 +24,7 @@ public class QuantityLength{
         double thisInFeet = this.unit.toFeet(this.value);
         double otherInFeet = other.unit.toFeet(other.value);
 
-        return Double.compare(thisInFeet, otherInFeet) == 0;
+        //return Double.compare(thisInFeet, otherInFeet) == 0;
+        return Math.abs(thisInFeet - otherInFeet) < EPSILON;
     }
 }

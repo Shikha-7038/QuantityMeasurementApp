@@ -150,7 +150,7 @@ class MeasurementApplicationTests {
 	@Test
 	void testEquality_CentimetersToInches_EquivalentValue() {
 		assertTrue(new QuantityLength(1.0, LengthUnit.CENTIMETERS)
-				.equals(new QuantityLength(0.3937008, LengthUnit.INCH)));
+				.equals(new QuantityLength(0.393701, LengthUnit.INCH)));
 	}
 
 	// 9
