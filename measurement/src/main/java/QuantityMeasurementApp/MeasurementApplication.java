@@ -5,8 +5,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.SpringApplication;
 
 public class MeasurementApplication {
-
-
 	// Inner class representing Feet measurement
 	static class Feet {
 		private final double value;
