@@ -14,5 +14,6 @@ public class MeasurementApplication {
 		QuantityLength q4 = new QuantityLength(1, LengthUnit.INCH);
 
 		System.out.println(q3 + " and " + q4 + " Equal (" + q3.equals(q4) + ")");
+
 	}
 }
