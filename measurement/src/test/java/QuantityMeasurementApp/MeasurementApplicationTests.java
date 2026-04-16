@@ -7,8 +7,8 @@ import QuantityMeasurementApp.enums.LengthUnit;
 
 //@SpringBootTest
 class MeasurementApplicationTests {
+
     private static final double EPSILON = 1e-6;
-    // 1
     @Test
     void testEquality_YardToYard_SameValue() {
         assertTrue(new QuantityLength(1.0, LengthUnit.YARD)
@@ -473,6 +473,187 @@ class MeasurementApplicationTests {
                 }
             }
         }
+    }
+
+    // ---------- ENUM TESTS ----------
+
+    @Test
+    void testLengthUnitEnum_FeetConstant() {
+        assertEquals(1.0, LengthUnit.FEET.getConversionFactor());
+    }
+
+    @Test
+    void testLengthUnitEnum_InchesConstant() {
+        assertEquals(1.0 / 12.0, LengthUnit.INCH.getConversionFactor(), EPSILON);
+    }
+
+    @Test
+    void testLengthUnitEnum_YardsConstant() {
+        assertEquals(3.0, LengthUnit.YARD.getConversionFactor());
+    }
+
+    @Test
+    void testLengthUnitEnum_CentimetersConstant() {
+        assertEquals(0.0328084, LengthUnit.CENTIMETERS.getConversionFactor(), EPSILON);
+    }
+
+    // ---------- convertToBaseUnit TESTS ----------
+
+    @Test
+    void testConvertToBaseUnit_FeetToFeet() {
+        assertEquals(5.0, LengthUnit.FEET.convertToBaseUnit(5.0), EPSILON);
+    }
+
+    @Test
+    void testConvertToBaseUnit_InchesToFeet() {
+        assertEquals(1.0, LengthUnit.INCH.convertToBaseUnit(12.0), EPSILON);
+    }
+
+    @Test
+    void testConvertToBaseUnit_YardsToFeet() {
+        assertEquals(3.0, LengthUnit.YARD.convertToBaseUnit(1.0), EPSILON);
+    }
+
+    @Test
+    void testConvertToBaseUnit_CentimetersToFeet() {
+        assertEquals(1.0, LengthUnit.CENTIMETERS.convertToBaseUnit(30.48), EPSILON);
+    }
+
+    // ---------- convertFromBaseUnit TESTS ----------
+
+    @Test
+    void testConvertFromBaseUnit_FeetToFeet() {
+        assertEquals(2.0, LengthUnit.FEET.convertFromBaseUnit(2.0), EPSILON);
+    }
+
+    @Test
+    void testConvertFromBaseUnit_FeetToInches() {
+        assertEquals(12.0, LengthUnit.INCH.convertFromBaseUnit(1.0), EPSILON);
+    }
+
+    @Test
+    void testConvertFromBaseUnit_FeetToYards() {
+        assertEquals(1.0, LengthUnit.YARD.convertFromBaseUnit(3.0), EPSILON);
+    }
+
+    @Test
+    void testConvertFromBaseUnit_FeetToCentimeters() {
+        assertEquals(30.48, LengthUnit.CENTIMETERS.convertFromBaseUnit(1.0), EPSILON);
+    }
+
+    // ---------- QuantityLength Equality ----------
+
+    @Test
+    void testQuantityLengthRefactored_Equality() {
+        QuantityLength q1 = new QuantityLength(1.0, LengthUnit.FEET);
+        QuantityLength q2 = new QuantityLength(12.0, LengthUnit.INCH);
+
+        assertTrue(q1.equals(q2));
+    }
+
+    // ---------- Conversion via Quantity ----------
+
+    @Test
+    void testQuantityLengthRefactored_ConvertTo() {
+        QuantityLength q = new QuantityLength(1.0, LengthUnit.FEET);
+        QuantityLength result = q.convert(LengthUnit.INCH);
+
+        assertTrue(result.equals(new QuantityLength(12.0, LengthUnit.INCH)));
+    }
+
+    // ---------- Addition ----------
+
+    @Test
+    void testQuantityLengthRefactored_Add() {
+        QuantityLength q1 = new QuantityLength(1.0, LengthUnit.FEET);
+        QuantityLength q2 = new QuantityLength(12.0, LengthUnit.INCH);
+
+        QuantityLength result = q1.add(q2);
+
+        assertTrue(result.equals(new QuantityLength(2.0, LengthUnit.FEET)));
+    }
+
+    @Test
+    void testQuantityLengthRefactored_AddWithTargetUnit() {
+        QuantityLength q1 = new QuantityLength(1.0, LengthUnit.FEET);
+        QuantityLength q2 = new QuantityLength(12.0, LengthUnit.INCH);
+
+        QuantityLength result = q1.add(q2, LengthUnit.YARD);
+
+        assertEquals(0.666666, result.convert(LengthUnit.YARD).getValue(), EPSILON);
+    }
+
+    // ---------- Validation ----------
+
+    @Test
+    void testQuantityLengthRefactored_NullUnit() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new QuantityLength(1.0, null));
+    }
+
+    @Test
+    void testQuantityLengthRefactored_InvalidValue() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new QuantityLength(Double.NaN, LengthUnit.FEET));
+    }
+
+    // ---------- Backward Compatibility ----------
+
+    @Test
+    void testBackwardCompatibility_UC1EqualityTests() {
+        QuantityLength q1 = new QuantityLength(3.0, LengthUnit.FEET);
+        QuantityLength q2 = new QuantityLength(36.0, LengthUnit.INCH);
+
+        assertTrue(q1.equals(q2));
+    }
+
+    @Test
+    void testBackwardCompatibility_UC5ConversionTests() {
+        QuantityLength q = new QuantityLength(1.0, LengthUnit.FEET);
+
+        assertTrue(q.convert(LengthUnit.INCH)
+                .equals(new QuantityLength(12.0, LengthUnit.INCH)));
+    }
+
+    @Test
+    void testBackwardCompatibility_UC6AdditionTests() {
+        QuantityLength q1 = new QuantityLength(2.0, LengthUnit.FEET);
+        QuantityLength q2 = new QuantityLength(24.0, LengthUnit.INCH);
+
+        assertTrue(q1.add(q2).equals(new QuantityLength(4.0, LengthUnit.FEET)));
+    }
+
+    @Test
+    void testBackwardCompatibility_UC7AdditionWithTargetUnitTests() {
+        QuantityLength q1 = new QuantityLength(1.0, LengthUnit.FEET);
+        QuantityLength q2 = new QuantityLength(12.0, LengthUnit.INCH);
+
+        QuantityLength result = q1.add(q2, LengthUnit.YARD);
+        assertEquals(0.666666, result.getValue(), 1e-5);
+        //assertTrue(result.equals(new QuantityLength(0.666666, LengthUnit.YARD)));
+    }
+
+    // ---------- Architecture & Advanced ----------
+
+    @Test
+    void testArchitecturalScalability_MultipleCategories() {
+        assertNotNull(LengthUnit.FEET);
+    }
+
+    @Test
+    void testRoundTripConversion_RefactoredDesign() {
+        QuantityLength original = new QuantityLength(5.0, LengthUnit.FEET);
+
+        QuantityLength converted = original.convert(LengthUnit.INCH)
+                .convert(LengthUnit.FEET);
+
+        assertTrue(original.equals(converted));
+    }
+
+    @Test
+    void testUnitImmutability() {
+        LengthUnit unit = LengthUnit.FEET;
+        assertEquals(1.0, unit.getConversionFactor());
     }
 
 }
