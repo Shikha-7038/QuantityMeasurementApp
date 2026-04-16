@@ -73,11 +73,8 @@ public class QuantityLength {
 
         double base1 = this.unit.convertToBaseUnit(this.value);
         double base2 = other.unit.convertToBaseUnit(other.value);
-
         double sumBase = base1 + base2;
-
         double result = targetUnit.convertFromBaseUnit(sumBase);
-
         return new QuantityLength(result, targetUnit);
     }
 
