@@ -1,67 +1,4 @@
-//package QuantityMeasurementApp.model;
-//import QuantityMeasurementApp.enums.LengthUnit;
-//public class QuantityLength{
-//
-//    private static final double EPSILON = 1e-6;
-//
-//    private final double value;
-//    private final LengthUnit unit;
-//    public double getValue() {
-//        return value;
-//    }
-//    public QuantityLength(double value, LengthUnit unit) {
-//        if(unit == null) throw new IllegalArgumentException("Unit shouldn't be null");
-//        if (Double.isNaN(value)) {
-//            throw new IllegalArgumentException("Value should not be NaN");
-//        }
-//        this.value = value;
-//        this.unit = unit;
-//    }
-//    // Convert to target unit
-//    public QuantityLength convert(LengthUnit targetUnit) {
-//        if(targetUnit == null){
-//            throw new IllegalArgumentException("Target cannot be null");
-//        }
-//        double baseValue = unit.convertToBaseUnit(value);
-//        double convertedValue = targetUnit.convertFromBaseUnit(baseValue);
-//        return new QuantityLength(convertedValue, targetUnit);
-//    }
-//
-//    // Add and return in same unit
-//    public QuantityLength add(QuantityLength other) {
-//        return add(other, this.unit);
-//    }
-//
-//    // Add and return in target unit
-//    public QuantityLength add(QuantityLength other, LengthUnit targetUnit) {
-//        if(other == null || targetUnit == null){
-//            throw new IllegalArgumentException("Second quantity and targetUnit must not be null.");
-//        }
-//        double base1 = this.unit.convertToBaseUnit(this.value);
-//        double base2 = other.unit.convertToBaseUnit(other.value);
-//
-//        double sumBase = base1 + base2;
-//
-//        double result = targetUnit.convertFromBaseUnit(sumBase);
-//
-//        return new QuantityLength(result, targetUnit);
-//    }
-//
-//    @Override
-//    public boolean equals(Object obj) {
-//        if (this == obj) return true;
-//        if (!(obj instanceof QuantityLength)) return false;
-//
-//        QuantityLength other = (QuantityLength) obj;
-//
-//        double base1 = this.unit.convertToBaseUnit(this.value);
-//        double base2 = other.unit.convertToBaseUnit(other.value);
-//
-//        return Math.abs(base1 - base2) < EPSILON;
-//    }
-//}
 package QuantityMeasurementApp.model;
-
 import QuantityMeasurementApp.enums.LengthUnit;
 
 public class QuantityLength {
@@ -74,7 +11,6 @@ public class QuantityLength {
     public double getValue() {
         return value;
     }
-
     public QuantityLength(double value, LengthUnit unit) {
         if (unit == null) {
             throw new IllegalArgumentException("Unit shouldn't be null");
@@ -92,7 +28,6 @@ public class QuantityLength {
         if (targetUnit == null) {
             throw new IllegalArgumentException("Target unit cannot be null");
         }
-
         double baseValue = unit.convertToBaseUnit(value);
         double converted = targetUnit.convertFromBaseUnit(baseValue);
 
