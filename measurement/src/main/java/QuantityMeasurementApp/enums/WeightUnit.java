@@ -15,12 +15,10 @@ public enum WeightUnit {
         return toKgFactor;
     }
 
-    // Convert value → kilograms (base unit)
     public double convertToBaseUnit(double value) {
         return value * toKgFactor;
     }
 
-    // Convert kilograms → this unit
     public double convertFromBaseUnit(double baseValue) {
         return baseValue / toKgFactor;
     }
