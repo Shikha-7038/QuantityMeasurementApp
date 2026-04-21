@@ -1,6 +1,6 @@
-package QuantityMeasurementApp.enums;
+package enumsImplement;
 
-public enum LengthUnit {
+public enum LengthUnit implements IMeasurable{
 
     FEET(1.0),
     INCH(1.0 / 12),
@@ -35,5 +35,9 @@ public enum LengthUnit {
 
     public double getConversionFactor() {
         return toFeetFactor;
+    }
+
+    public String getUnitName() {
+        return this.name();
     }
 }

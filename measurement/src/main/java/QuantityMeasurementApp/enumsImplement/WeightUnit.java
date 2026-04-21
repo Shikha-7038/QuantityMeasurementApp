@@ -1,5 +1,5 @@
-package QuantityMeasurementApp.enums;
-public enum WeightUnit {
+package enumsImplement;
+public enum WeightUnit extends IMeasurable {
 
     KILOGRAM(1.0),
     GRAM(0.001),
