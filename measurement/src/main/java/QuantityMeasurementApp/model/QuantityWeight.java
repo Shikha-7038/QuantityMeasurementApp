@@ -1,77 +1,74 @@
 package QuantityMeasurementApp.model;
-import QuantityMeasurementApp.enums.WeightUnit;
+import QuantityMeasurementApp.enumsImplement.WeightUnit;
 public class QuantityWeight {
-    private static final double EPSILON = 1e-6;
-    private final double value;
-    private final WeightUnit unit;
-
-    public double getValue() {
-        return value;
-    }
+    private final Quantity<WeightUnit> delegate;
 
     public QuantityWeight(double value, WeightUnit unit) {
         if (unit == null) {
             throw new IllegalArgumentException("Unit cannot be null");
         }
-        if (Double.isNaN(value) || Double.isInfinite(value)) {
-            throw new IllegalArgumentException("Invalid value");
-        }
-        this.value = value;
-        this.unit = unit;
+        this.delegate = new Quantity<>(value, unit);
     }
-    public QuantityWeight convertTo(WeightUnit targetUnit) {
-        if (targetUnit == null) {
-            throw new IllegalArgumentException("Target unit cannot be null");
-        }
-        double base = unit.convertToBaseUnit(value);
-        double converted = targetUnit.convertFromBaseUnit(base);
-        return new QuantityWeight(converted, targetUnit);
+
+    public double getValue() {
+        return delegate.getValue();
     }
+
+    public WeightUnit getUnit() {
+        return delegate.getUnit();
+    }
+
+    // Legacy conversion helpers
+    public double toKilogram() {
+        return delegate.convertTo(WeightUnit.KILOGRAM).getValue();
+    }
+
+    public double toGram() {
+        return delegate.convertTo(WeightUnit.GRAM).getValue();
+    }
+
+    public double toPound() {
+        return delegate.convertTo(WeightUnit.POUND).getValue();
+    }
+
+    // Conversion
+    public QuantityWeight convert(WeightUnit targetUnit) {
+        Quantity<WeightUnit> converted = delegate.convertTo(targetUnit);
+        return new QuantityWeight(converted.getValue(), converted.getUnit());
+    }
+
+    // Addition
     public QuantityWeight add(QuantityWeight other) {
-        return add(other, this.unit);
+        if (other == null) {
+            throw new IllegalArgumentException("Second operand cannot be null");
+        }
+        Quantity<WeightUnit> result = delegate.add(other.delegate, this.getUnit());
+        return new QuantityWeight(result.getValue(), result.getUnit());
     }
 
     public QuantityWeight add(QuantityWeight other, WeightUnit targetUnit) {
-
         if (other == null || targetUnit == null) {
-            throw new IllegalArgumentException("Invalid operands");
+            throw new IllegalArgumentException("Operands and target unit cannot be null");
         }
-        double base1 = this.unit.convertToBaseUnit(this.value);
-        double base2 = other.unit.convertToBaseUnit(other.value);
-        double sumBase = base1 + base2;
-        double result = targetUnit.convertFromBaseUnit(sumBase);
-        return new QuantityWeight(result, targetUnit);
+        Quantity<WeightUnit> result = delegate.add(other.delegate, targetUnit);
+        return new QuantityWeight(result.getValue(), result.getUnit());
     }
 
-    public double toKilogram() {
-        return unit.convertToBaseUnit(value);
-    }
-
-    public double toConvert(WeightUnit targetUnit) {
-        return targetUnit.convertFromBaseUnit(
-                unit.convertToBaseUnit(value)
-        );
-    }
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        //if (!(obj instanceof QuantityWeight)) return false;
-
-        QuantityWeight other = (QuantityWeight) obj;
-
-        double base1 = this.unit.convertToBaseUnit(this.value);
-        double base2 = other.unit.convertToBaseUnit(other.value);
-
-        return Math.abs(base1 - base2) < EPSILON;
+        if (obj instanceof QuantityWeight other) {
+            return delegate.equals(other.delegate);
+        }
+        return false;
     }
+
     @Override
     public int hashCode() {
-        long base = Double.doubleToLongBits(unit.convertToBaseUnit(value));
-        return (int) (base ^ (base >>> 32));
+        return delegate.hashCode();
     }
+
     @Override
     public String toString() {
-        return "Quantity(" + value + ", " + unit + ")";
+        return delegate.toString();
     }
 }

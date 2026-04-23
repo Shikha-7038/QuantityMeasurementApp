@@ -1,99 +1,91 @@
 package QuantityMeasurementApp.model;
-import QuantityMeasurementApp.enums.LengthUnit;
+import QuantityMeasurementApp.enumsImplement.LengthUnit;
 
 public class QuantityLength {
+    private final Quantity<LengthUnit> delegate;
 
-    private static final double EPSILON = 1e-6;
-
-    private final double value;
-    private final LengthUnit unit;
-
-    public double getValue() {
-        return value;
-    }
     public QuantityLength(double value, LengthUnit unit) {
         if (unit == null) {
-            throw new IllegalArgumentException("Unit shouldn't be null");
+            throw new IllegalArgumentException("Unit cannot be null");
         }
-        if (Double.isNaN(value) || Double.isInfinite(value)) {
-            throw new IllegalArgumentException("Invalid value");
-        }
-
-        this.value = value;
-        this.unit = unit;
+        this.delegate = new Quantity<>(value, unit);
     }
 
-    // Instance conversion
+    public double getValue() {
+        return delegate.getValue();
+    }
+
+    public LengthUnit getUnit() {
+        return delegate.getUnit();
+    }
+
+    // Legacy conversion helpers
+    public double toFeet() {
+        return delegate.convertTo(LengthUnit.FEET).getValue();
+    }
+
+    public double toInch() {
+        return delegate.convertTo(LengthUnit.INCH).getValue();
+    }
+
+    public double toYard() {
+        return delegate.convertTo(LengthUnit.YARD).getValue();
+    }
+
+    public double toCentimeter() {
+        return delegate.convertTo(LengthUnit.CENTIMETERS).getValue();
+    }
+
+    public double toConvert(LengthUnit target) {
+        return delegate.convertTo(target).getValue();
+    }
+
+    // Conversion
     public QuantityLength convert(LengthUnit targetUnit) {
-        if (targetUnit == null) {
-            throw new IllegalArgumentException("Target unit cannot be null");
-        }
-        double baseValue = unit.convertToBaseUnit(value);
-        double converted = targetUnit.convertFromBaseUnit(baseValue);
-
-        return new QuantityLength(converted, targetUnit);
+        Quantity<LengthUnit> converted = delegate.convertTo(targetUnit);
+        return new QuantityLength(converted.getValue(), converted.getUnit());
     }
 
-    // Static conversion used by tests
+    // Addition
+    public QuantityLength add(QuantityLength other) {
+        if (other == null) {
+            throw new IllegalArgumentException("Second operand cannot be null");
+        }
+        Quantity<LengthUnit> result = delegate.add(other.delegate, this.getUnit());
+        return new QuantityLength(result.getValue(), result.getUnit());
+    }
+
+    public QuantityLength add(QuantityLength other, LengthUnit targetUnit) {
+        if (other == null || targetUnit == null) {
+            throw new IllegalArgumentException("Operands and target unit cannot be null");
+        }
+        Quantity<LengthUnit> result = delegate.add(other.delegate, targetUnit);
+        return new QuantityLength(result.getValue(), result.getUnit());
+    }
+
+    // Static helper for legacy tests
     public static double convert(double value, LengthUnit from, LengthUnit to) {
         if (from == null || to == null) {
             throw new IllegalArgumentException("Units cannot be null");
         }
-        if (Double.isNaN(value) || Double.isInfinite(value)) {
-            throw new IllegalArgumentException("Invalid value");
-        }
-
-        double base = from.convertToBaseUnit(value);
-        return to.convertFromBaseUnit(base);
-    }
-
-    // Convert this quantity to feet
-    public double toFeet() {
-        return unit.convertToBaseUnit(value);
-    }
-
-    // Convert to target unit and return value
-    public double toConvert(LengthUnit targetUnit) {
-        return targetUnit.convertFromBaseUnit(
-                unit.convertToBaseUnit(value)
-        );
-    }
-
-    // Add quantities (same unit result)
-    public QuantityLength add(QuantityLength other) {
-        return add(other, this.unit);
-    }
-
-    // Add quantities with target unit
-    public QuantityLength add(QuantityLength other, LengthUnit targetUnit) {
-
-        if (other == null || targetUnit == null) {
-            throw new IllegalArgumentException("Invalid operands");
-        }
-
-        double base1 = this.unit.convertToBaseUnit(this.value);
-        double base2 = other.unit.convertToBaseUnit(other.value);
-        double sumBase = base1 + base2;
-        double result = targetUnit.convertFromBaseUnit(sumBase);
-        return new QuantityLength(result, targetUnit);
+        return new Quantity<>(value, from).convertTo(to).getValue();
     }
 
     @Override
     public boolean equals(Object obj) {
+        if (obj instanceof QuantityLength other) {
+            return delegate.equals(other.delegate);
+        }
+        return false;
+    }
 
-        if (this == obj) return true;
-        if (!(obj instanceof QuantityLength)) return false;
-
-        QuantityLength other = (QuantityLength) obj;
-
-        double base1 = this.unit.convertToBaseUnit(this.value);
-        double base2 = other.unit.convertToBaseUnit(other.value);
-
-        return Math.abs(base1 - base2) < EPSILON;
+    @Override
+    public int hashCode() {
+        return delegate.hashCode();
     }
 
     @Override
     public String toString() {
-        return "Quantity(" + value + ", " + unit + ")";
+        return delegate.toString();
     }
 }

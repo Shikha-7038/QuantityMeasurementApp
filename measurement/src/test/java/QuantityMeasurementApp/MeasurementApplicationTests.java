@@ -4,8 +4,8 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import QuantityMeasurementApp.model.QuantityLength;
 import QuantityMeasurementApp.model.QuantityWeight;
-import QuantityMeasurementApp.enums.LengthUnit;
-import QuantityMeasurementApp.enums.WeightUnit;
+import QuantityMeasurementApp.enumsImplement.LengthUnit;
+import QuantityMeasurementApp.enumsImplement.WeightUnit;
 
 //@SpringBootTest
 class MeasurementApplicationTests {
@@ -749,7 +749,7 @@ class MeasurementApplicationTests {
     void testConversion_PoundToKilogram() {
         assertEquals(1.0,
                 new QuantityWeight(2.20462, WeightUnit.POUND)
-                        .convertTo(WeightUnit.KILOGRAM).getValue(),
+                        .convert(WeightUnit.KILOGRAM).getValue(),
                 1e-5);
     }
 
@@ -757,21 +757,21 @@ class MeasurementApplicationTests {
     void testConversion_KilogramToPound() {
         assertEquals(2.20462,
                 new QuantityWeight(1.0, WeightUnit.KILOGRAM)
-                        .convertTo(WeightUnit.POUND).getValue(),
+                        .convert(WeightUnit.POUND).getValue(),
                 1e-5);
     }
 
     @Test
     void testConversion_SameUnit() {
         QuantityWeight q = new QuantityWeight(5.0, WeightUnit.KILOGRAM);
-        assertEquals(q, q.convertTo(WeightUnit.KILOGRAM));
+        assertEquals(q, q.convert(WeightUnit.KILOGRAM));
     }
 
     @Test
     void testConversionWeight_ZeroValue() {
         assertEquals(0.0,
                 new QuantityWeight(0.0, WeightUnit.KILOGRAM)
-                        .convertTo(WeightUnit.GRAM).getValue(),
+                        .convert(WeightUnit.GRAM).getValue(),
                 EPSILON);
     }
 
@@ -779,7 +779,7 @@ class MeasurementApplicationTests {
     void testConversionWeight_NegativeValue() {
         assertEquals(-1000.0,
                 new QuantityWeight(-1.0, WeightUnit.KILOGRAM)
-                        .convertTo(WeightUnit.GRAM).getValue(),
+                        .convert(WeightUnit.GRAM).getValue(),
                 EPSILON);
     }
 
@@ -787,8 +787,8 @@ class MeasurementApplicationTests {
     void testConversionWeight_RoundTrip() {
         QuantityWeight q = new QuantityWeight(5.0, WeightUnit.KILOGRAM);
 
-        QuantityWeight result = q.convertTo(WeightUnit.GRAM)
-                .convertTo(WeightUnit.KILOGRAM);
+        QuantityWeight result = q.convert(WeightUnit.GRAM)
+                .convert(WeightUnit.KILOGRAM);
 
         assertTrue(q.equals(result));
     }

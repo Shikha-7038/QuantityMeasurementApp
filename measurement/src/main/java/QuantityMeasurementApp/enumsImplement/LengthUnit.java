@@ -1,5 +1,5 @@
-package enumsImplement;
-
+package QuantityMeasurementApp.enumsImplement;
+import QuantityMeasurementApp.enums.IMeasurable;
 public enum LengthUnit implements IMeasurable{
 
     FEET(1.0),
@@ -16,27 +16,21 @@ public enum LengthUnit implements IMeasurable{
     public double toFeet(double value) {
         return value * toFeetFactor;
     }
-
-    // Convert given value → feet (base unit)
     public double convertToBaseUnit(double value) {
         if(!Double.isFinite(value)){
             throw new IllegalArgumentException("Invalid value");
         }
         return value * toFeetFactor;
     }
-
-    // Convert feet → this unit
     public double convertFromBaseUnit(double baseValue) {
         if(!Double.isFinite(baseValue)){
             throw new IllegalArgumentException("Invalid value");
         }
         return baseValue / toFeetFactor;
     }
-
     public double getConversionFactor() {
         return toFeetFactor;
     }
-
     public String getUnitName() {
         return this.name();
     }

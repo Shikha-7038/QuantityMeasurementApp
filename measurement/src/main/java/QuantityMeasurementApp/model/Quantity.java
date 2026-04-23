@@ -1,25 +1,22 @@
-package QuantityMeasurementApp.enumsImplement;
-
+package QuantityMeasurementApp.model;
+import QuantityMeasurementApp.enums.IMeasurable;
 public class Quantity<U extends IMeasurable> {
 
     private static final double EPSILON = 1e-6;
-
     private final double value;
     private final U unit;
 
-    // ===== Constructor =====
     public Quantity(double value, U unit) {
         if (unit == null) {
             throw new IllegalArgumentException("Unit cannot be null");
         }
-        if (Double.isNaN(value) || Double.isInfinite(value)) {
-            throw new IllegalArgumentException("Value must be finite");
+        if (!Double.isFinite(value)) {
+            throw new IllegalArgumentException("Value must be finite and not NaN");
         }
         this.value = value;
         this.unit = unit;
     }
 
-    // ===== Getters =====
     public double getValue() {
         return value;
     }
@@ -28,66 +25,59 @@ public class Quantity<U extends IMeasurable> {
         return unit;
     }
 
-    // ===== Convert =====
+    // Convert to target unit
     public Quantity<U> convertTo(U targetUnit) {
-        if (!unit.getClass().equals(targetUnit.getClass())) {
-            throw new IllegalArgumentException("Incompatible unit types");
+        if (targetUnit == null) {
+            throw new IllegalArgumentException("Target unit cannot be null");
         }
-
-        double baseValue = unit.convertToBaseUnit(value);
-        double convertedValue = targetUnit.convertFromBaseUnit(baseValue);
-
-        return new Quantity<>(convertedValue, targetUnit);
+        double base = unit.convertToBaseUnit(value);
+        double converted = targetUnit.convertFromBaseUnit(base);
+        return new Quantity<>(converted, targetUnit);
     }
 
-    // ===== Add (same unit as this) =====
+    // Add (implicit unit)
     public Quantity<U> add(Quantity<U> other) {
+        if (other == null) {
+            throw new IllegalArgumentException("Second operand cannot be null");
+        }
         return add(other, this.unit);
     }
 
-    // ===== Add (explicit target unit) =====
+    // Add (explicit target unit)
     public Quantity<U> add(Quantity<U> other, U targetUnit) {
-        if (!unit.getClass().equals(other.unit.getClass())) {
-            throw new IllegalArgumentException("Incompatible unit types");
+        if (other == null || targetUnit == null) {
+            throw new IllegalArgumentException("Operands and target unit cannot be null");
         }
-
-        double sumBase =
-                this.unit.convertToBaseUnit(this.value) +
-                        other.unit.convertToBaseUnit(other.value);
-
-        double result = targetUnit.convertFromBaseUnit(sumBase);
-
-        return new Quantity<>(result, targetUnit);
+        double base1 = unit.convertToBaseUnit(value);
+        double base2 = other.unit.convertToBaseUnit(other.value);
+        double sum = base1 + base2;
+        return new Quantity<>(targetUnit.convertFromBaseUnit(sum), targetUnit);
     }
 
-    // ===== Equals =====
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
 
         if (!(obj instanceof Quantity<?> other)) return false;
 
-        // Cross-category check
+        // Category safety: must be same unit class
         if (!this.unit.getClass().equals(other.unit.getClass())) {
             return false;
         }
 
-        double thisBase = unit.convertToBaseUnit(value);
-        double otherBase = other.unit.convertToBaseUnit(other.value);
+        double base1 = unit.convertToBaseUnit(value);
+        double base2 = other.unit.convertToBaseUnit(other.value);
 
-        return Math.abs(thisBase - otherBase) < EPSILON;
+        return Math.abs(base1 - base2) < EPSILON;
     }
 
-    // ===== HashCode =====
     @Override
     public int hashCode() {
-        long bits = Double.doubleToLongBits(unit.convertToBaseUnit(value));
-        return (int) (bits ^ (bits >>> 32));
+        return Double.hashCode(unit.convertToBaseUnit(value));
     }
 
-    // ===== toString =====
     @Override
     public String toString() {
-        return value + " " + unit.getUnitName();
+        return "Quantity(" + value + ", " + unit.getUnitName() + ")";
     }
 }
