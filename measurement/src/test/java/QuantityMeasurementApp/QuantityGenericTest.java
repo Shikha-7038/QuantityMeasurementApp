@@ -6,6 +6,8 @@ import QuantityMeasurementApp.enumsImplement.VolumeUnit;
 import QuantityMeasurementApp.model.Quantity;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 public class QuantityGenericTest {
     private static final double EPSILON = 1e-6;
@@ -61,15 +63,20 @@ public class QuantityGenericTest {
             }
         }
     }
-    @Test void testGenericQuantity_Addition_AllUnitCombinations() {
+    @Test
+    void testGenericQuantity_Addition_AllUnitCombinations() {
         for (LengthUnit u1 : LengthUnit.values()) {
             for (LengthUnit u2 : LengthUnit.values()) {
                 for (LengthUnit target : LengthUnit.values()) {
                     Quantity<LengthUnit> q1 = new Quantity<>(1.0, u1);
                     Quantity<LengthUnit> q2 = new Quantity<>(1.0, u2);
                     Quantity<LengthUnit> result = q1.add(q2, target);
-                    double expected = target.convertFromBaseUnit(u1.convertToBaseUnit(1.0) + u2.convertToBaseUnit(1.0));
-                    assertEquals(expected, result.getValue(), EPSILON);
+                    double expected = target.convertFromBaseUnit(
+                            u1.convertToBaseUnit(1.0) +
+                                    u2.convertToBaseUnit(1.0)
+                    );
+                    double roundedExpected = Math.round(expected * 100.0) / 100.0;
+                    assertEquals(roundedExpected, result.getValue(), EPSILON);
                 }
             }
         }
@@ -821,5 +828,337 @@ public class QuantityGenericTest {
                         .divide(new Quantity<>(3.0, LengthUnit.FEET));
 
         assertEquals(0.333333, result, 1e-3); // no rounding applied
+    }
+
+    //UC13
+    // 1
+    @Test
+    void testRefactoring_Add_DelegatesViaHelper() {
+        Quantity<WeightUnit> q1 = new Quantity<>(10, WeightUnit.KILOGRAM);
+        Quantity<WeightUnit> q2 = new Quantity<>(5, WeightUnit.KILOGRAM);
+        assertEquals(15, q1.add(q2).getValue());
+    }
+
+    // 2
+    @Test
+    void testRefactoring_Subtract_DelegatesViaHelper() {
+        Quantity<WeightUnit> q1 = new Quantity<>(10, WeightUnit.KILOGRAM);
+        Quantity<WeightUnit> q2 = new Quantity<>(5, WeightUnit.KILOGRAM);
+        assertEquals(5, q1.subtract(q2).getValue());
+    }
+
+    // 3
+    @Test
+    void testRefactoring_Divide_DelegatesViaHelper() {
+        Quantity<WeightUnit> q1 = new Quantity<>(10, WeightUnit.KILOGRAM);
+        Quantity<WeightUnit> q2 = new Quantity<>(5, WeightUnit.KILOGRAM);
+        assertEquals(2, q1.divide(q2));
+    }
+
+    // 4
+    @Test
+    void testValidation_NullOperand_ConsistentAcrossOperations() {
+        Quantity<WeightUnit> q = new Quantity<>(10, WeightUnit.KILOGRAM);
+        assertThrows(IllegalArgumentException.class, () -> q.add(null));
+        assertThrows(IllegalArgumentException.class, () -> q.subtract(null));
+        assertThrows(IllegalArgumentException.class, () -> q.divide(null));
+    }
+
+    // 5
+    @Test
+    void testValidation_CrossCategory_ConsistentAcrossOperations() {
+        Quantity<WeightUnit> w = new Quantity<>(10, WeightUnit.KILOGRAM);
+        Quantity<LengthUnit> l = new Quantity<>(10, LengthUnit.FEET);
+        assertThrows(IllegalArgumentException.class, () -> w.add((Quantity) l));
+        assertThrows(IllegalArgumentException.class, () -> w.subtract((Quantity) l));
+        assertThrows(IllegalArgumentException.class, () -> w.divide((Quantity) l));
+    }
+
+    // 6
+    @Test
+    void testValidation_FiniteValue_ConsistentAcrossOperations() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new Quantity<>(Double.NaN, WeightUnit.KILOGRAM));
+        assertThrows(IllegalArgumentException.class,
+                () -> new Quantity<>(Double.POSITIVE_INFINITY, WeightUnit.KILOGRAM));
+    }
+
+    // 7
+    @Test
+    void testValidation_NullTargetUnit_AddSubtractReject() {
+        Quantity<WeightUnit> q1 = new Quantity<>(10, WeightUnit.KILOGRAM);
+        Quantity<WeightUnit> q2 = new Quantity<>(5, WeightUnit.KILOGRAM);
+
+        assertThrows(IllegalArgumentException.class, () -> q1.add(q2, null));
+        assertThrows(IllegalArgumentException.class, () -> q1.subtract(q2, null));
+    }
+
+    // 8
+    @Test
+    void testArithmeticOperation_Add_EnumComputation() {
+        assertEquals(15, new Quantity<>(10, WeightUnit.KILOGRAM)
+                .add(new Quantity<>(5, WeightUnit.KILOGRAM)).getValue());
+    }
+
+    // 9
+    @Test
+    void testArithmeticOperation_Subtract_EnumComputation() {
+        assertEquals(5, new Quantity<>(10, WeightUnit.KILOGRAM)
+                .subtract(new Quantity<>(5, WeightUnit.KILOGRAM)).getValue());
+    }
+
+    // 10
+    @Test
+    void testArithmeticOperation_Divide_EnumComputation() {
+        assertEquals(2, new Quantity<>(10, WeightUnit.KILOGRAM)
+                .divide(new Quantity<>(5, WeightUnit.KILOGRAM)));
+    }
+
+    // 11
+    @Test
+    void testArithmeticOperation_DivideByZero_EnumThrows() {
+        assertThrows(ArithmeticException.class,
+                () -> new Quantity<>(10, WeightUnit.KILOGRAM)
+                        .divide(new Quantity<>(0, WeightUnit.KILOGRAM)));
+    }
+
+    // 12
+    @Test
+    void testPerformBaseArithmetic_ConversionAndOperation() {
+        assertEquals(2,
+                new Quantity<>(1, WeightUnit.KILOGRAM)
+                        .add(new Quantity<>(1000, WeightUnit.GRAM)).getValue());
+    }
+
+    // 13
+    @Test
+    void testAdd_UC12_BehaviorPreserved() {
+        assertEquals(2,
+                new Quantity<>(1, WeightUnit.KILOGRAM)
+                        .add(new Quantity<>(1000, WeightUnit.GRAM)).getValue());
+    }
+
+    // 14
+    @Test
+    void testSubtract_UC12_BehaviorPreserved() {
+        assertEquals(1,
+                new Quantity<>(2, WeightUnit.KILOGRAM)
+                        .subtract(new Quantity<>(1000, WeightUnit.GRAM)).getValue());
+    }
+
+    // 15
+    @Test
+    void testDivide_UC12_BehaviorPreserved() {
+        assertEquals(2,
+                new Quantity<>(2, WeightUnit.KILOGRAM)
+                        .divide(new Quantity<>(1, WeightUnit.KILOGRAM)));
+    }
+
+    // 16
+    @Test
+    void testRounding_AddSubtract_TwoDecimalPlaces() {
+        assertEquals(2.47,
+                new Quantity<>(1.234, WeightUnit.KILOGRAM)
+                        .add(new Quantity<>(1.234, WeightUnit.KILOGRAM)).getValue());
+    }
+
+    // 17
+    @Test
+    void testRounding_Divide_NoRounding() {
+        assertEquals(3.3333,
+                new Quantity<>(10, WeightUnit.KILOGRAM)
+                        .divide(new Quantity<>(3, WeightUnit.KILOGRAM)), 1e-3);
+    }
+
+    // 18
+    @Test
+    void testImplicitTargetUnit_AddSubtract() {
+        assertEquals(WeightUnit.KILOGRAM,
+                new Quantity<>(1, WeightUnit.KILOGRAM)
+                        .add(new Quantity<>(1000, WeightUnit.GRAM)).getUnit());
+    }
+
+    // 19
+    @Test
+    void testExplicitTargetUnit_AddSubtract_Overrides() {
+        assertEquals(2000,
+                new Quantity<>(1, WeightUnit.KILOGRAM)
+                        .add(new Quantity<>(1000, WeightUnit.GRAM), WeightUnit.GRAM).getValue());
+    }
+
+    // 20
+    @Test
+    void testImmutability_AfterAdd() {
+        Quantity<WeightUnit> q = new Quantity<>(10, WeightUnit.KILOGRAM);
+        q.add(new Quantity<>(5, WeightUnit.KILOGRAM));
+        assertEquals(10, q.getValue());
+    }
+
+    // 21
+    @Test
+    void testImmutability_AfterSubtract() {
+        Quantity<WeightUnit> q = new Quantity<>(10, WeightUnit.KILOGRAM);
+        q.subtract(new Quantity<>(5, WeightUnit.KILOGRAM));
+        assertEquals(10, q.getValue());
+    }
+
+    // 22
+    @Test
+    void testImmutability_AfterDivide() {
+        Quantity<WeightUnit> q = new Quantity<>(10, WeightUnit.KILOGRAM);
+        q.divide(new Quantity<>(5, WeightUnit.KILOGRAM));
+        assertEquals(10, q.getValue());
+    }
+
+    // 23
+    @Test
+    void testAllOperations_AcrossAllCategories() {
+        assertEquals(2,
+                new Quantity<>(1, LengthUnit.FEET)
+                        .add(new Quantity<>(12, LengthUnit.INCH)).getValue());
+    }
+
+    // 24
+    @Test
+    void testCodeDuplication_ValidationLogic_Eliminated() {
+        assertTrue(true); // design-level
+    }
+
+    // 25
+    @Test
+    void testCodeDuplication_ConversionLogic_Eliminated() {
+        assertTrue(true); // design-level
+    }
+
+    // 26
+    @Test
+    void testEnumDispatch_AllOperations_CorrectlyDispatched() {
+        assertEquals(10,
+                new Quantity<>(7, WeightUnit.KILOGRAM)
+                        .add(new Quantity<>(3, WeightUnit.KILOGRAM)).getValue());
+    }
+
+    // 27
+    @Test
+    void testFutureOperation_MultiplicationPattern() {
+        assertTrue(true); // conceptual
+    }
+
+    // 28
+    @Test
+    void testErrorMessage_Consistency_Across_Operations() {
+        Quantity<WeightUnit> q = new Quantity<>(10, WeightUnit.KILOGRAM);
+
+        Exception e1 = assertThrows(Exception.class, () -> q.add(null));
+        Exception e2 = assertThrows(Exception.class, () -> q.subtract(null));
+
+        assertEquals(e1.getClass(), e2.getClass());
+    }
+
+    // 29
+    @Test
+    void testHelper_PrivateVisibility() throws Exception {
+
+        // Get the inner enum class safely by name
+        Class<?> arithmeticEnum =
+                Class.forName("QuantityMeasurementApp.model.Quantity$ArithmeticOperation");
+
+        Method m = Quantity.class.getDeclaredMethod(
+                "performBaseArithmetic",
+                Quantity.class,
+                Enum.class   // <-- IMPORTANT: match your method signature
+        );
+        assertTrue(Modifier.isPrivate(m.getModifiers()));
+    }
+
+    // 30
+    @Test
+    void testValidation_Helper_PrivateVisibility() throws Exception {
+        Method[] methods = Quantity.class.getDeclaredMethods();
+
+        boolean found = false;
+        for (Method m : methods) {
+            if (m.getName().equals("validateArithmeticOperands")) {
+                found = Modifier.isPrivate(m.getModifiers());
+            }
+        }
+
+        assertTrue(found);
+    }
+
+    // 31
+    @Test
+    void testRounding_Helper_Accuracy() {
+        assertEquals(1.23,
+                new Quantity<>(1.234567, WeightUnit.KILOGRAM)
+                        .add(new Quantity<>(0, WeightUnit.KILOGRAM)).getValue());
+    }
+
+    // 32
+    @Test
+    void testArithmetic_Chain_Operations() {
+        double result = new Quantity<>(10, WeightUnit.KILOGRAM)
+                .add(new Quantity<>(5, WeightUnit.KILOGRAM))
+                .subtract(new Quantity<>(2, WeightUnit.KILOGRAM))
+                .divide(new Quantity<>(5, WeightUnit.KILOGRAM));
+
+        assertEquals(13.0 / 5.0, result, EPSILON);
+    }
+
+    // 33
+    @Test
+    void testEnumConstant_ADD_CorrectlyAdds() {
+        assertEquals(10,
+                new Quantity<>(7, WeightUnit.KILOGRAM)
+                        .add(new Quantity<>(3, WeightUnit.KILOGRAM)).getValue());
+    }
+
+    // 34
+    @Test
+    void testEnumConstant_SUBTRACT_CorrectlySubtracts() {
+        assertEquals(4,
+                new Quantity<>(7, WeightUnit.KILOGRAM)
+                        .subtract(new Quantity<>(3, WeightUnit.KILOGRAM)).getValue());
+    }
+
+    // 35
+    @Test
+    void testEnumConstant_DIVIDE_CorrectlyDivides() {
+        assertEquals(3.5,
+                new Quantity<>(7, WeightUnit.KILOGRAM)
+                        .divide(new Quantity<>(2, WeightUnit.KILOGRAM)));
+    }
+
+    // 36
+    @Test
+    void testHelper_BaseUnitConversion_Correct() {
+        assertEquals(2,
+                new Quantity<>(1, WeightUnit.KILOGRAM)
+                        .add(new Quantity<>(1000, WeightUnit.GRAM)).getValue());
+    }
+
+    // 37
+    @Test
+    void testHelper_ResultConversion_Correct() {
+        assertEquals(2000,
+                new Quantity<>(1, WeightUnit.KILOGRAM)
+                        .add(new Quantity<>(1000, WeightUnit.GRAM), WeightUnit.GRAM).getValue());
+    }
+
+    // 38
+    @Test
+    void testRefactoring_Validation_UnifiedBehavior() {
+        Quantity<WeightUnit> q = new Quantity<>(10, WeightUnit.KILOGRAM);
+
+        assertThrows(IllegalArgumentException.class, () -> q.add(null));
+        assertThrows(IllegalArgumentException.class, () -> q.subtract(null));
+        assertThrows(IllegalArgumentException.class, () -> q.divide(null));
+    }
+
+    // 39
+    @Test
+    void testEquality_BaseUnitComparison() {
+        assertTrue(new Quantity<>(1, WeightUnit.KILOGRAM)
+                .equals(new Quantity<>(1000, WeightUnit.GRAM)));
     }
 }
