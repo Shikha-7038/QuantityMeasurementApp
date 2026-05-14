@@ -1,5 +1,4 @@
 package QuantityMeasurementApp.dto;
-import QuantityMeasurementApp.enumsImplement.WeightUnit;
 public class QuantityDTO {
     private double value;
     private String unit;
