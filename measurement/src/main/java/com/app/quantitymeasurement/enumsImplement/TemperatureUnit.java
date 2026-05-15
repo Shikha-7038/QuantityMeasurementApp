@@ -2,7 +2,6 @@ package com.app.quantitymeasurement.enumsImplement;
 import com.app.quantitymeasurement.enums.IMeasurable;
 import java.util.function.Function;
 public enum TemperatureUnit implements IMeasurable {
-
     CELSIUS(
             c -> c,           // to base (Celsius)
             c -> c            // from base
@@ -18,7 +17,6 @@ public enum TemperatureUnit implements IMeasurable {
 
     private final Function<Double, Double> toBase;
     private final Function<Double, Double> fromBase;
-
     TemperatureUnit(Function<Double, Double> toBase, Function<Double, Double> fromBase) {
         this.toBase = toBase;
         this.fromBase = fromBase;

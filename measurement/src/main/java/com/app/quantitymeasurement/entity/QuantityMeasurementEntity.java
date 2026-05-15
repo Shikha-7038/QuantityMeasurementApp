@@ -19,10 +19,7 @@ public class QuantityMeasurementEntity implements Serializable {
         this.result = errorMessage;
         this.error = true;
     }
-    public String getOperation() {
-        return operation;
-    }
-
+    public String getOperation() {return operation; }
     public String getInput() {
         return input;
     }

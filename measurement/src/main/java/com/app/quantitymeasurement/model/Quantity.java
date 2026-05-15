@@ -54,8 +54,6 @@ public class Quantity<U extends IMeasurable> {
             throw new IllegalArgumentException("Target unit required");
         if (targetUnit != null && !unit.getClass().equals(targetUnit.getClass()))
             throw new IllegalArgumentException("Target unit must be same category");
-
-        // UC14: validate operation support on involved units (may throw UnsupportedOperationException)
         unit.validateOperationSupport(operation);
         other.unit.validateOperationSupport(operation);
         if (targetUnit != null) targetUnit.validateOperationSupport(operation);

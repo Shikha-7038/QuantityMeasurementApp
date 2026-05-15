@@ -18,26 +18,21 @@ public class QuantityWeight {
         return delegate.getUnit();
     }
 
-    // Legacy conversion helpers
     public double toKilogram() {
         return delegate.convertTo(WeightUnit.KILOGRAM).getValue();
     }
-
     public double toGram() {
         return delegate.convertTo(WeightUnit.GRAM).getValue();
     }
-
     public double toPound() {
         return delegate.convertTo(WeightUnit.POUND).getValue();
     }
 
-    // Conversion
     public QuantityWeight convert(WeightUnit targetUnit) {
         Quantity<WeightUnit> converted = delegate.convertTo(targetUnit);
         return new QuantityWeight(converted.getValue(), converted.getUnit());
     }
 
-    // Addition
     public QuantityWeight add(QuantityWeight other) {
         if (other == null) {
             throw new IllegalArgumentException("Second operand cannot be null");

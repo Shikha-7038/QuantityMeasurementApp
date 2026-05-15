@@ -14,39 +14,30 @@ public class QuantityLength {
     public double getValue() {
         return delegate.getValue();
     }
-
     public LengthUnit getUnit() {
         return delegate.getUnit();
     }
 
-    // Legacy conversion helpers
     public double toFeet() {
         return delegate.convertTo(LengthUnit.FEET).getValue();
     }
-
     public double toInch() {
         return delegate.convertTo(LengthUnit.INCH).getValue();
     }
-
     public double toYard() {
         return delegate.convertTo(LengthUnit.YARD).getValue();
     }
-
     public double toCentimeter() {
         return delegate.convertTo(LengthUnit.CENTIMETERS).getValue();
     }
-
     public double toConvert(LengthUnit target) {
         return delegate.convertTo(target).getValue();
     }
-
-    // Conversion
     public QuantityLength convert(LengthUnit targetUnit) {
         Quantity<LengthUnit> converted = delegate.convertTo(targetUnit);
         return new QuantityLength(converted.getValue(), converted.getUnit());
     }
 
-    // Addition
     public QuantityLength add(QuantityLength other) {
         if (other == null) {
             throw new IllegalArgumentException("Second operand cannot be null");
@@ -63,7 +54,6 @@ public class QuantityLength {
         return new QuantityLength(result.getValue(), result.getUnit());
     }
 
-    // Static helper for legacy tests
     public static double convert(double value, LengthUnit from, LengthUnit to) {
         if (from == null || to == null) {
             throw new IllegalArgumentException("Units cannot be null");

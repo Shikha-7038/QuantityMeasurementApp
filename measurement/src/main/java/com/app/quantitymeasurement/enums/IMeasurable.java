@@ -11,11 +11,9 @@ public interface IMeasurable {
     default String getUnitName(){
         return this.getClass().getSimpleName();
     }
-
     default SupportsArithmetic supportsArithmetic(){
         return () -> true;
     }
-
     default void validateOperationSupport(String operation){
 
     }
