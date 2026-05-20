@@ -14,7 +14,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import com.app.quantitymeasurement.controller.QuantityMeasurementController;
 import com.app.quantitymeasurement.dto.QuantityDTO;
-import com.app.quantitymeasurement.entity.QuantityMeasurementEntity;
+import com.app.quantitymeasurement.model.QuantityMeasurementEntity;
 import com.app.quantitymeasurement.repositoryImpl.QuantityMeasurementCacheRepository;
 import com.app.quantitymeasurement.repositoryImpl.QuantityMeasurementDatabaseRepository;
 import com.app.quantitymeasurement.repository.QuantityMeasurementRepository;

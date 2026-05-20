@@ -1,5 +1,5 @@
 package com.app.quantitymeasurement.repositoryImpl;
-import com.app.quantitymeasurement.entity.QuantityMeasurementEntity;
+import com.app.quantitymeasurement.model.QuantityMeasurementEntity;
 import com.app.quantitymeasurement.repository.QuantityMeasurementRepository;
 
 import java.util.ArrayList;

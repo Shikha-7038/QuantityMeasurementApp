@@ -1,48 +1,35 @@
 package com.app.quantitymeasurement.dto;
 
-public class QuantityDTO {
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class QuantityDTO {
     private double value;
     private String unit;
     private String measurementType;
-
     private boolean error;
     private String errorMessage;
 
-    public QuantityDTO(
-            double value,
-            String unit,
-            String measurementType
-    ) {
+    // Constructor for success case
+    public QuantityDTO(double value, String unit, String measurementType) {
         this.value = value;
         this.unit = unit;
         this.measurementType = measurementType;
-
         this.error = false;
         this.errorMessage = null;
     }
 
-    public QuantityDTO(
-            boolean error,
-            String errorMessage
-    ) {
+    // Constructor for error case
+    public QuantityDTO(boolean error, String errorMessage) {
         this.error = error;
         this.errorMessage = errorMessage;
     }
 
-    public double getValue() {
-        return value;
-    }
-    public String getUnit() {
-        return unit;
-    }
-    public String getMeasurementType() {
-        return measurementType;
-    }
     public boolean hasError() {
         return error;
-    }
-    public String getErrorMessage() {
-        return errorMessage;
     }
 }

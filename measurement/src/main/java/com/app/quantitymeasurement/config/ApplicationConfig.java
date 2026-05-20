@@ -2,7 +2,6 @@ package com.app.quantitymeasurement.config;
 import java.io.InputStream;
 import java.util.Properties;
 public class ApplicationConfig {
-
     private static final Properties properties = new Properties();
     static {
         try {

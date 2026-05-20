@@ -4,7 +4,10 @@ target/
 *.jar
 *.war
 *.ear
-
+# Dump folder
+/dump/
+dump/
+**/dump/
 # Eclipse
 .project
 .classpath
@@ -17,3 +20,4 @@ target/
 # OS files
 .DS_Store
 Thumbs.db
+

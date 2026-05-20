@@ -1,7 +1,7 @@
 package com.app.quantitymeasurement.serviceImpl;
 
 import com.app.quantitymeasurement.dto.QuantityDTO;
-import com.app.quantitymeasurement.entity.QuantityMeasurementEntity;
+import com.app.quantitymeasurement.model.QuantityMeasurementEntity;
 import com.app.quantitymeasurement.exception.QuantityMeasurementException;
 import com.app.quantitymeasurement.model.Quantity;
 import com.app.quantitymeasurement.enums.IMeasurable;
@@ -10,9 +10,9 @@ import com.app.quantitymeasurement.service.QuantityMeasurementService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-public class QuantityMeasurementServiceImpl
-        implements QuantityMeasurementService {
+import org.springframework.stereotype.Service;
+@Service
+public class QuantityMeasurementServiceImpl implements QuantityMeasurementService {
 
     private static final Logger LOGGER =
             LoggerFactory.getLogger(QuantityMeasurementServiceImpl.class);
