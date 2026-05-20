@@ -50,6 +50,7 @@ public class QuantityMeasurementRestController {
 
     @GetMapping("/history/operation/{operation}")
     public List<QuantityMeasurementDTO> getHistoryByOperation(@PathVariable String operation) {
+        System.out.println("CONTROLLER HIT");
         return service.getHistoryByOperation(operation.toUpperCase());
     }
 
