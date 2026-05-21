@@ -16,7 +16,19 @@ dump/
 # IntelliJ
 .idea/
 *.iml
+# Environment files (CRITICAL!)
+.env
+application-*.properties
+!application-example.properties
 
+# VS Code
+.vscode/
+
+# Maven wrapper (if using)
+.mvn/
+
+# Heap dumps
+*.hprof
 # OS files
 .DS_Store
 Thumbs.db

@@ -29,7 +29,7 @@ public class AuthController {
     }
 
     @GetMapping("/success")
-    public String success(OAuth2AuthenticationToken authentication) {
+    public void success(OAuth2AuthenticationToken authentication, HttpServletResponse response) throws IOException {
 
         OAuth2User user = authentication.getPrincipal();
 
@@ -37,7 +37,8 @@ public class AuthController {
         String name = user.getAttribute("name");
 
         User savedUser = userService.saveOrUpdateUser(email, name);
-
-        return jwtUtil.generateToken(savedUser.getEmail());
+        //return jwtUtil.generateToken(savedUser.getEmail());
+        String token = jwtUtil.generateToken(savedUser.getEmail());
+        response.sendRedirect("http://localhost:3000/?token=" + token);
     }
 }
